@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content">
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" 
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp">
+    
+    <!-- padding to top -->
+    <View 
+        android:layout_height="10dp"
+        android:layout_width="fill_parent"
+        />
+    
+    <!-- Name Label -->
+    <TextView 
+        android:id="@+id/view_recipe_name_label"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Titel nicht verfügbar"
+        android:textSize="17dip"
+        android:textStyle="bold"/>
+    
+    <TableLayout
+        android:layout_height="wrap_content"
+ 	    android:layout_width="match_parent"
+ 	    android:paddingTop="10dp">
+ 	    
+        <TableRow >
+	  		<TextView 
+		        android:text="Portionen: "/>
+		 	<TextView 
+		        android:id="@+id/view_recipe_servings_label"
+		        android:text="keine Angaben"/>
+        </TableRow>
+        
+       	<TableRow >
+	  		<TextView 
+		        android:text="Vorbereitung: "/>
+		 	<TextView 
+		        android:id="@+id/view_recipe_prepare_time_label"
+		        android:text="keine Angaben"/>
+		 	<TextView 
+		        android:text="min"/>
+        </TableRow>
+        
+       	<TableRow >
+	  		<TextView 
+		        android:text="Kochen: "/>
+		 	<TextView 
+		        android:id="@+id/view_recipe_cooking_time_label"
+		        android:text="keine Angaben"/>
+		 	<TextView 
+		        android:text="min"/>
+        </TableRow>
+        
+    </TableLayout>
+        
+    <TextView 
+        android:paddingTop="10dp"
+		android:text="Zutaten:"
+		android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"/>
+    
+    <TableLayout
+        android:id="@+id/view_recipe_ingredients_table" 
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:paddingTop="5dp">
+
+    </TableLayout>
+    
+    
+    <TextView 
+        android:paddingTop="10dp"
+		android:text="Zubereitung:"
+		android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"/>
+    
+  	<TableLayout
+        android:id="@+id/view_recipe_instructions_table" 
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:paddingTop="5dp">
+       	
+  	</TableLayout>
+    
+    <!--<TextView 
+        android:id="@+id/view_recipe_instructions_label"
+        android:text="keine Angaben"
+        android:paddingTop="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>-->
+	
+	<!-- padding to bottom -->
+    <View 
+        android:layout_height="10dp"
+        android:layout_width="fill_parent"
+        />
+	
+</LinearLayout>
+</ScrollView>

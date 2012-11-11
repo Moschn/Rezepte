@@ -1,0 +1,109 @@
+package ch.simonf.rezepte.activities;
+
+import ch.simonf.rezepte.R;
+import ch.simonf.rezepte.activities.Recipes.AllRecipesActivity;
+import ch.simonf.rezepte.activities.Recipes.ViewRecipeActivity;
+import ch.simonf.rezepte.utils.AsyncQueue;
+import ch.simonf.rezepte.utils.Globals;
+import ch.simonf.rezepte.utils.MySQL;
+import android.app.ListActivity;
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
+
+public class AllItemsActivity extends ListActivity {
+	
+	// reference to mysql object
+	MySQL mysql = Globals.mysql;
+	AsyncQueue asyncQueue = Globals.asyncQueue;
+
+	
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.all_recipes);
+		
+		ListView lv = getListView();
+		
+		new AsyncTask<Void, Void, Void>() {
+
+			protected void onPreExecute(){
+				// setup "please wait" dialog
+				mysql.setupDialog(AllItemsActivity.this, "Lade Rezepte...");
+			}
+			
+			@Override
+			protected Void doInBackground(Void... params) {
+				// get all recipes
+				mysql.getRecipes();
+				return null;
+			}
+			
+			protected void onPostExecute(Void results)
+			{
+				//
+				updateListView();
+				// dismiss the loading dialog
+				mysql.dismissDialog();
+			}
+		}.execute();
+		
+		lv.setOnItemClickListener(new OnItemClickListener() {
+
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				// getting values from selected ListItem
+				String pid = ((TextView) view.findViewById(R.id.pid)).getText()
+						.toString();
+
+				// Starting new intent
+				Intent in = new Intent(getApplicationContext(),
+						ViewRecipeActivity.class);
+				// sending pid to next activity
+				in.putExtra("id", pid);
+				
+				// starting new activity and expecting some response back
+				startActivityForResult(in, 100);
+			}
+		});
+		
+	}
+	
+	
+	public void updateListView() 
+	{
+		// put mysql data into ListView
+		ListAdapter adapter = new SimpleAdapter(
+				AllItemsActivity.this, mysql.recipes_to_hashmap(),
+				R.layout.list_item, new String[] { "id",
+						"name"},
+				new int[] { R.id.pid, R.id.name });
+		// updating listview
+		setListAdapter(adapter);
+	}
+	
+
+	// Response from Edit Product Activity
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		// if result code 100
+		if (resultCode == 100) {
+			// if result code 100 is received 
+			// means user edited/deleted product
+			// reload this screen again
+			Intent intent = getIntent();
+			finish();
+			startActivity(intent);
+		}
+
+	}
+}
