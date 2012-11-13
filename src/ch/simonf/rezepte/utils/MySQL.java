@@ -15,10 +15,13 @@ import org.json.JSONObject;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 import android.util.SparseArray;
 import ch.simonf.rezepte.R;
+import ch.simonf.rezepte.activities.User;
+import ch.simonf.rezepte.activities.Ingredients.AllIngredientsActivity;
 import ch.simonf.rezepte.recipe.Arrangement;
 import ch.simonf.rezepte.recipe.Ingredient;
 import ch.simonf.rezepte.recipe.Measurement;
@@ -30,8 +33,12 @@ public class MySQL {
 	public SparseArray<Ingredient> ingredients = new SparseArray<Ingredient>();
 	public SparseArray<Measurement> measurements = new SparseArray<Measurement>();
 	
+	public User user;
+	
 	private Context context;
 	private Handler handler;
+	
+	private static final String url_folder = "http://lv-studios.ch/projects/android_connect/";
 	
 	// url to get all products list
 	String url_all_recipes = "http://lv-studios.ch/projects/android_connect/get_all_recipes.php";
@@ -44,7 +51,8 @@ public class MySQL {
 	private static final String url_ingredient_details = "http://lv-studios.ch/projects/android_connect/get_ingredient_details.php";
 	private static final String url_measurement_details = "http://lv-studios.ch/projects/android_connect/get_measurement_details.php";
 	
-	private static final String url_get_all_columns = "http://lv-studios.ch/projects/android_connect/get_all_columns.php";
+	private static final String url_get_all_columns = url_folder + "select.php";
+	private static final String url_insert = url_folder + "insert.php";
 	
 	private static final String TAG_SUCCESS = "success";
 	
@@ -216,6 +224,58 @@ public class MySQL {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}			
+	}
+	
+	public void createUser(String id)
+	{
+		insert("users", "facebookId", id);
+	}
+	
+	public boolean getUserDetails()
+	{
+		JSONArray response = getAllColumns("users", "facebookId", "("+user.get_id()+")");
+		JSONObject jUser = null;
+		try {
+			jUser = response.getJSONObject(0);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		if(jUser == null)
+			return false;
+					
+		else
+		{
+			// TODO Add details to user instance
+			return true;
+		}
+	}
+	
+	private void insert(String table, String names, String values)
+	{
+		List<NameValuePair> params = new ArrayList<NameValuePair>();
+		
+		params.add(new BasicNameValuePair("table", table));
+		params.add(new BasicNameValuePair("names", names));
+		params.add(new BasicNameValuePair("values", values));
+		
+		JSONParser jParser = new JSONParser();
+		JSONObject json = jParser.makeHttpRequest(url_insert, "POST", params);
+		
+		// check log cat fro response
+		Log.d("Create User: ", json.toString());
+
+		// check for success tag
+		try {
+			int success = json.getInt(TAG_SUCCESS);
+
+			if (success == 1) {
+				// successfully created user
+			} else {
+				// failed to create product
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private JSONArray getAllColumns(String table, String key, String needle)

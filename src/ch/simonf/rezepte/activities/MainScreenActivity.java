@@ -37,6 +37,8 @@ public class MainScreenActivity extends Activity{
 	Button btnNewProduct;
 	Button btnShowRecipes;
 	
+	private MySQL mysql;
+	
 	//----Facebook----//
     Facebook facebook = new Facebook("217995184999450");
     AsyncFacebookRunner mAsyncRunner = new AsyncFacebookRunner(facebook);
@@ -53,6 +55,9 @@ public class MainScreenActivity extends Activity{
 		setContentView(R.layout.main_screen);
 		
 		Globals.mysql = new MySQL();
+		//Globals.user = new User();
+		this.mysql = Globals.mysql;
+		//mysql.user = Globals.user;
 		
 		// not used at the moment
 		Globals.asyncQueue = new AsyncQueue();
@@ -133,7 +138,10 @@ public class MainScreenActivity extends Activity{
 		        String name = obj.optString("name");
 		        
 		        //create new User instance with retrieved facebook id
+		        
 		        Globals.user = new User(facebookId);
+		        mysql.user = Globals.user;
+		        Globals.user.inExistence();
 		        
 		        TextView welcomeMessage = (TextView) findViewById(R.id.main_screen_welcome_message);
 		        welcomeMessage.setText("Willkommen " + name);
