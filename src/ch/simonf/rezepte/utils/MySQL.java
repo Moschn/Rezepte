@@ -11,17 +11,14 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import com.google.gson.Gson;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 import android.util.SparseArray;
-import ch.simonf.rezepte.R;
 import ch.simonf.rezepte.activities.User;
-import ch.simonf.rezepte.activities.Ingredients.AllIngredientsActivity;
 import ch.simonf.rezepte.recipe.Arrangement;
 import ch.simonf.rezepte.recipe.Ingredient;
 import ch.simonf.rezepte.recipe.Measurement;
@@ -53,6 +50,7 @@ public class MySQL {
 	
 	private static final String url_get_all_columns = url_folder + "select.php";
 	private static final String url_insert = url_folder + "insert.php";
+	private static final String url_update = url_folder + "update.php";
 	
 	private static final String TAG_SUCCESS = "success";
 	
@@ -145,10 +143,10 @@ public class MySQL {
 	public void getIngredients()
 	{
 		JSONArray items = getAllColumns("ingredients", null, null);
+		
 		try {
-			getIngredientDetails(items);
+			transferIngredients(items);
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -231,7 +229,7 @@ public class MySQL {
 		insert("users", "facebookId", id);
 	}
 	
-	public boolean getUserDetails()
+	public boolean getUserDetails() throws JSONException
 	{
 		JSONArray response = getAllColumns("users", "facebookId", "("+user.get_id()+")");
 		JSONObject jUser = null;
@@ -246,7 +244,70 @@ public class MySQL {
 		else
 		{
 			// TODO Add details to user instance
+			String json = jUser.getString("ingredients");
+			JSONObject temp = new JSONObject(json);
+			JSONArray jIngredients = temp.getJSONArray("ingredients");
+			getIngredientDetails(jIngredients);
+			user.addIngredient(jIngredients);
 			return true;
+		}
+	}
+	
+	public void updateUserDetails() throws JSONException
+	{
+		Gson gObject = new Gson();
+		JSONObject jObject = new JSONObject();
+		jObject.put("ingredients", new JSONArray());
+		for(int i = 0; i < user.ingredients.size(); i ++)
+		{
+			jObject.getJSONArray("ingredients").put(user.ingredients.valueAt(i).get_id());
+		}
+		String jString = gObject.toJson(jObject.toString());
+		
+		
+		ArrayList<BasicNameValuePair> values = new ArrayList<BasicNameValuePair>();
+		values.add(new BasicNameValuePair("ingredients", jString/*jObject.toString()*/));
+		update("users", values, "facebookId", user.get_id());
+	}
+	
+	private void update(String table, ArrayList<BasicNameValuePair> values, String whereName, String whereValue)
+	{
+		List<NameValuePair> params = new ArrayList<NameValuePair>();
+		
+		String paramsValues = "";
+		for(int i = 0; i < values.size(); i++)
+		{
+			// don't add a "," the first iteration
+			if(i != 0)
+				paramsValues += ", ";
+			
+			paramsValues += values.get(i).getName();
+			paramsValues += " = ";
+			paramsValues += values.get(i).getValue();
+		}
+		
+		params.add(new BasicNameValuePair("table", table));
+		params.add(new BasicNameValuePair("values", paramsValues));
+		params.add(new BasicNameValuePair("whereName", whereName));
+		params.add(new BasicNameValuePair("whereValue", whereValue));
+		
+		JSONParser jParser = new JSONParser();
+		JSONObject json = jParser.makeHttpRequest(url_update, "POST", params);
+		
+		// check log cat fro response
+		Log.d("Create User: ", json.toString());
+
+		// check for success tag
+		try {
+			int success = json.getInt(TAG_SUCCESS);
+
+			if (success == 1) {
+				// successfully created user
+			} else {
+				// failed to create product
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -326,6 +387,7 @@ public class MySQL {
 
 	private ArrayList<Arrangement> parseArrangement(String values)
 	{
+		// TODO store Arrangements as json
 		ArrayList<Arrangement> arrangements = new ArrayList<Arrangement>();
 		// e.g. "2<val>4<val>1<arr>4<val>5<val>2<arr>..." becomes "2<val>4<val>1","4<val>5<val>2",...
 		String[] temp = values.split("<arr>");
@@ -373,19 +435,12 @@ public class MySQL {
 		return arrangements;
 	}
 	
-	private void getIngredientDetails(JSONArray items) throws JSONException{
+	private void getIngredientDetails(JSONArray jIngredients) throws JSONException{
+		String jString = jIngredients.toString();
 		
-		// looping through All Products
-		for (int i = 0; i < items.length(); i++) {
-			JSONObject jIngredient = items.getJSONObject(i);
-			
-			// set ingredient id through the constructor
-			Ingredient ingredient = new Ingredient(Integer.parseInt(jIngredient.getString("id")));
-			
-			transferIngredients(ingredient, jIngredient);
-			
-			this.ingredients.put(ingredient.get_id(), ingredient);
-		}
+		jString = "(" + jString.substring(1, jString.length() - 1) + ")";
+		JSONArray jResponse = getAllColumns("ingredients","id",jString);
+		transferIngredients(jResponse);
 	}
 
 	private void getIngredientDetails(Recipe recipe) throws JSONException
@@ -439,6 +494,23 @@ public class MySQL {
 				return recipe.arrangements.get(i).ingredient;
 		}
 		return null;
+	}
+	
+	private void transferIngredients(JSONArray items) throws NumberFormatException, JSONException
+	{
+		JSONObject jIngredient;
+		Ingredient ingredient;
+		// looping through all ingredients
+		for (int i = 0; i < items.length(); i++) {
+			jIngredient = items.getJSONObject(i);
+			
+			// create new ingredient and add it to the list
+			ingredient = new Ingredient(Integer.parseInt(jIngredient.getString("id")));
+			
+			transferIngredients(ingredient, jIngredient);
+			
+			this.ingredients.put(ingredient.get_id(), ingredient);
+		}
 	}
 
 	// transfers ingredients from a JSONObject to the already existing ingredient instance

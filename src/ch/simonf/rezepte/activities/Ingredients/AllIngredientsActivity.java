@@ -11,12 +11,14 @@ import android.widget.AdapterView;
 import android.view.View.OnLongClickListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import ch.simonf.rezepte.R;
 import ch.simonf.rezepte.activities.Recipes.ViewRecipeActivity;
+import ch.simonf.rezepte.recipe.Ingredient;
 import ch.simonf.rezepte.utils.Globals;
 import ch.simonf.rezepte.utils.MySQL;
 
@@ -86,20 +88,19 @@ public class AllIngredientsActivity extends ListActivity  {
 		
 		lv.setOnItemClickListener(new OnItemClickListener() {
 
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
-				// getting values from selected ListItem
-				String pid = ((TextView) view.findViewById(R.id.pid)).getText()
-						.toString();
-
-				// Starting new intent
-				Intent in = new Intent(getApplicationContext(),
-						ViewRecipeActivity.class);
-				// sending pid to next activity
-				in.putExtra("id", pid);
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				TextView tvId = (TextView) view.findViewById(R.id.pid);
 				
-				// starting new activity and expecting some response back
-				startActivityForResult(in, 100);
+				LinearLayout llContainer = (LinearLayout)view.findViewById(R.id.container);
+				
+				llContainer.setBackgroundColor(0xFFFF0000);
+				
+				String pid = tvId.getText().toString();
+				
+				
+				
+				Ingredient ingredient = mysql.ingredients.get(Integer.parseInt(pid));
+				Globals.user.toggleIngredient(ingredient);
 			}
 		});
 		

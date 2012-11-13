@@ -13,6 +13,11 @@
 
 
     <!-- Name Label -->
+    <LinearLayout 
+        android:orientation="horizontal"
+        android:layout_height="fill_parent"
+        android:layout_width="fill_parent"
+        android:id="@+id/container">
     <TextView
         android:id="@+id/name"
         android:layout_width="fill_parent"
@@ -22,5 +27,12 @@
         android:textStyle="bold"
         android:paddingTop="20dp"
         android:paddingBottom="20dp" />
+
+    <!--<CheckBox
+        android:id="@+id/checkBox1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>-->
+    
+    </LinearLayout>
 
 </LinearLayout>
