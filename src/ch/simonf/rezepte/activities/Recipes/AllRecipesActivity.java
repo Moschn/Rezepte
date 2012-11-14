@@ -1,5 +1,7 @@
 package ch.simonf.rezepte.activities.Recipes;
 
+import java.util.ArrayList;
+
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -12,9 +14,13 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import ch.simonf.rezepte.R;
+import ch.simonf.rezepte.recipe.Ingredient;
+import ch.simonf.rezepte.recipe.Recipe;
 import ch.simonf.rezepte.utils.AsyncQueue;
+import ch.simonf.rezepte.utils.Converter;
 import ch.simonf.rezepte.utils.Globals;
 import ch.simonf.rezepte.utils.MySQL;
+import ch.simonf.rezepte.utils.RecipesAdapter;
 
 /* Status:
  * static listing of all recipes
@@ -28,14 +34,14 @@ public class AllRecipesActivity extends ListActivity {
 	
 	// reference to mysql object
 	MySQL mysql = Globals.mysql;
-	AsyncQueue asyncQueue = Globals.asyncQueue;
+	RecipesAdapter recipesAdapter;
 
 	
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.all_recipes);
+		setContentView(R.layout.all_recipes_list);
 		
 		ListView lv = getListView();
 		
@@ -89,11 +95,17 @@ public class AllRecipesActivity extends ListActivity {
 		// put mysql data into ListView
 		ListAdapter adapter = new SimpleAdapter(
 				AllRecipesActivity.this, mysql.recipes_to_hashmap(),
-				R.layout.list_item, new String[] { "id",
+				R.layout.all_recipes_row, new String[] { "id",
 						"name"},
 				new int[] { R.id.pid, R.id.name });
 		// updating listview
-		setListAdapter(adapter);
+		
+		// convert SparseArray recipes to ArrayList in order to pass it along our Adapter
+		ArrayList<Recipe> recipesList = Converter.SparseArray_to_ArrayList(mysql.recipes);
+		
+		RecipesAdapter recipesAdapter = new RecipesAdapter(this, R.layout.all_recipes_row, recipesList);
+		
+		setListAdapter(recipesAdapter);
 	}
 	
 

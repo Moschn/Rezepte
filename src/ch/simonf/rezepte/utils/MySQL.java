@@ -33,22 +33,10 @@ public class MySQL {
 	public User user;
 	
 	private Context context;
-	private Handler handler;
 	
 	private static final String url_folder = "http://lv-studios.ch/projects/android_connect/";
 	
-	// url to get all products list
-	String url_all_recipes = "http://lv-studios.ch/projects/android_connect/get_all_recipes.php";
-	// single product url
-	private static final String url_recipe_detials = "http://lv-studios.ch/projects/android_connect/get_recipe_details.php";
-	// url to update product
-	private static final String url_update_product = "http://lv-studios.ch/projects/android_connect/update_product.php";	
-	// url to delete product
-	private static final String url_delete_product = "http://lv-studios.ch/projects/android_connect/delete_product.php";	
-	private static final String url_ingredient_details = "http://lv-studios.ch/projects/android_connect/get_ingredient_details.php";
-	private static final String url_measurement_details = "http://lv-studios.ch/projects/android_connect/get_measurement_details.php";
-	
-	private static final String url_get_all_columns = url_folder + "select.php";
+	private static final String url_select = url_folder + "select.php";
 	private static final String url_insert = url_folder + "insert.php";
 	private static final String url_update = url_folder + "update.php";
 	
@@ -91,50 +79,11 @@ public class MySQL {
 	}
 	
 	public void getRecipes () {
-    	
-    	// Creating JSON Parser object
-		JSONParser jParser = new JSONParser();
-
-		// JSON Node names
-		final String TAG_SUCCESS = "success";
-		final String TAG_ITEM = "recipes";
-		final String TAG_PID = "id";
-		final String TAG_NAME = "name";
-
-		// products JSONArray
-		JSONArray items = null;
-			
 		
-		// Building Parameters
-		List<NameValuePair> list = new ArrayList<NameValuePair>();
-		// getting JSON string from URL
-		JSONObject json = jParser.makeHttpRequest(url_all_recipes, "GET", list);
+		JSONArray items = getAllColumns("recipes", null, null);
 		
-		// Check your log cat for JSON reponse
-		Log.d("All Recipes: ", json.toString());
-
 		try {
-			// Checking for SUCCESS TAG
-			int success = json.getInt(TAG_SUCCESS);
-
-			if (success == 1) {
-				// products found
-				// Getting Array of Products
-				items = json.getJSONArray(TAG_ITEM);
-
-				// looping through All Products
-				for (int i = 0; i < items.length(); i++) {
-					JSONObject c = items.getJSONObject(i);
-
-					// Storing each json item in variable
-					String id = c.getString(TAG_PID);
-					String name = c.getString(TAG_NAME);
-
-					recipes.put(Integer.parseInt(id), new Recipe(Integer.parseInt(id),name));
-				}
-			} else {
-
-			}
+			transferRecipes(items);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -154,71 +103,11 @@ public class MySQL {
 	public void getRecipeDetails(int id) 
 	{
     	
-		//Integer id = params[0];
 		Recipe recipe = recipes.get(id);
-		JSONObject jRecipe;
-
-		
-		// Creating JSON Parser object
-		JSONParser jParser = new JSONParser();
-		
-		int success;
 		
 		try {
-			// Building Parameters
-			List<NameValuePair> list = new ArrayList<NameValuePair>();
-			list.add(new BasicNameValuePair("id", Integer.toString(id)));
-
-			// getting product details by making HTTP request
-			// Note that product details url will use GET request
-			JSONObject json = jParser.makeHttpRequest(url_recipe_detials, "GET", list);
-
-			// check your log for json response
-			Log.d("Single Product Details", json.toString());
-			
-			// json success tag
-			success = json.getInt(TAG_SUCCESS);
-			if (success == 1) {
-				// successfully received product details
-				JSONArray productObj = json.getJSONArray("recipe"); // JSON Array
-				
-				// get first product object from JSON Array
-				jRecipe = productObj.getJSONObject(0);
-				
-				recipe.servings = Integer.parseInt(jRecipe.getString("servings"));
-				recipe.prepare_time = Integer.parseInt(jRecipe.getString("prepare_time"));
-				recipe.cooking_time = Integer.parseInt(jRecipe.getString("cooking_time"));
-				recipe.created_by = Integer.parseInt(jRecipe.getString("created_by"));
-				recipe.updated_by = Integer.parseInt(jRecipe.getString("updated_by"));
-				recipe.created_at = Timestamp.valueOf(jRecipe.getString("created_at"));
-				recipe.updated_at = Timestamp.valueOf(jRecipe.getString("updated_at"));
-				
-				recipe.instructions = parseInstructions(jRecipe.getString("instructions"));
-				
-				// parse ingredient string into an ArrayList:
-				//e.g. ingredients[i] = {amount_i, measurment_i, ingredient_i} 
-				recipe.arrangements = parseArrangement(jRecipe.getString("ingredients"));
-				
-				getIngredientDetails(recipe);
-				getMeasurementDetails(recipe);
-				
-				for(int i = 0; i < 0/*recipe.arrangements.size()*/; i++)
-				{
-					// never get details for an instance that is already complete
-					// isEmpty() requires at least API 9
-					if((recipe.arrangements.get(i).ingredient.name) == null)
-						getIngredientDetails(recipe);
-					
-					if((recipe.arrangements.get(i).measurement.name) == null)
-						getMeasurementDetails(recipe);
-				}
-				
-				
-				//product = productObj.getJSONObject(0);
-
-			}else{
-				// product with pid not found
-			}
+			getIngredientDetails(recipe);
+			getMeasurementDetails(recipe);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}			
@@ -364,7 +253,7 @@ public class MySQL {
 		params.add(new BasicNameValuePair("key", key));
 		params.add(new BasicNameValuePair("needle", needle));
 		// getting JSON string from URL
-		JSONObject json = jParser.makeHttpRequest(url_get_all_columns, "GET", params);
+		JSONObject json = jParser.makeHttpRequest(url_select, "GET", params);
 		
 		// Check your log cat for JSON reponse
 		Log.d("All columns: ", json.toString());
@@ -499,6 +388,41 @@ public class MySQL {
 		return null;
 	}
 	
+	private void transferRecipes(JSONArray items) throws NumberFormatException, JSONException {
+		JSONObject jRecipe;
+		Recipe recipe;
+		// looping through all recipes
+		for (int i = 0; i < items.length(); i++) {
+			jRecipe = items.getJSONObject(i);
+			
+			int id = Integer.parseInt(jRecipe.getString("id"));
+			String name = jRecipe.getString("name");
+			
+			// create new recipe and add it to the list
+			recipe = new Recipe(id, name);
+			
+			transferRecipes(recipe, jRecipe);
+			
+			this.recipes.put(recipe.get_id(), recipe);
+		}
+	}
+
+	private void transferRecipes(Recipe recipe, JSONObject jRecipe) throws IllegalArgumentException, JSONException {
+		recipe.servings = Integer.parseInt(jRecipe.getString("servings"));
+		recipe.prepare_time = Integer.parseInt(jRecipe.getString("prepare_time"));
+		recipe.cooking_time = Integer.parseInt(jRecipe.getString("cooking_time"));
+		recipe.created_by = Integer.parseInt(jRecipe.getString("created_by"));
+		recipe.updated_by = Integer.parseInt(jRecipe.getString("updated_by"));
+		recipe.created_at = Timestamp.valueOf(jRecipe.getString("created_at"));
+		recipe.updated_at = Timestamp.valueOf(jRecipe.getString("updated_at"));
+		
+		recipe.instructions = parseInstructions(jRecipe.getString("instructions"));
+		
+		// parse ingredient string into an ArrayList:
+		//e.g. ingredients[i] = {amount_i, measurment_i, ingredient_i} 
+		recipe.arrangements = parseArrangement(jRecipe.getString("ingredients"));
+	}
+
 	private void transferIngredients(JSONArray items) throws NumberFormatException, JSONException
 	{
 		JSONObject jIngredient;
@@ -610,11 +534,6 @@ public class MySQL {
 	public Context get_context()
 	{
 		return context;
-	}
-	
-	public void set_handler(Handler handler)
-	{
-		this.handler = handler;
 	}
 
 	

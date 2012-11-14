@@ -52,7 +52,7 @@ public class AllIngredientsActivity extends ListActivity  {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.all_recipes);
+		setContentView(R.layout.all_ingredients_list);
 		
 		ListView lv = getListView();
 		
@@ -120,13 +120,7 @@ public class AllIngredientsActivity extends ListActivity  {
 	
 	
 	public void updateListView() 
-	{
-		// put mysql data into ListView
-		ListAdapter adapter = new SimpleAdapter(
-				AllIngredientsActivity.this, mysql.ingredients_to_hashmap(), R.layout.list_item, new String[] { "id", "name"}, new int[] { R.id.pid, R.id.name 
-					});
-		// updating listview
-		
+	{	
 		// convert SparseArray ingredients to ArrayList in order to pass it along our Adapter
 		ArrayList<Ingredient> ingredientsList = Converter.SparseArray_to_ArrayList(mysql.ingredients);
 		

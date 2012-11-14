@@ -25,6 +25,11 @@
         android:textSize="17dip"
         android:textStyle="bold"/>
     
+	<TextView 
+        android:id="@+id/view_recipe_recipe_match" 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    
     <TableLayout
         android:layout_height="wrap_content"
  	    android:layout_width="match_parent"

@@ -3,14 +3,15 @@ package ch.simonf.rezepte.recipe;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
+import android.util.SparseArray;
+
 public class Recipe{
-	final int ID;
+	private final int id;
 	
 	public String name;
 	public int servings;
 	public int prepare_time;
 	public int cooking_time;
-	public ArrayList<Ingredient> ingredients;
 	public ArrayList<String> instructions;
 	public ArrayList<Arrangement> arrangements;
 	public int created_by;
@@ -20,12 +21,27 @@ public class Recipe{
 	
 	public Recipe(int id, String name)
 	{
-		this.ID = id;
+		this.id = id;
 		this.name = name;
 	}
 	
-	public void getIngredients()
+	public SparseArray<Ingredient> getIngredients()
 	{
+		if(arrangements.size() == 0)
+			return null;
 		
+		SparseArray<Ingredient> ingredients = new SparseArray<Ingredient>();
+		for(int i = 0; i < arrangements.size(); i++)
+		{
+			Ingredient ingredient = arrangements.get(i).ingredient;
+			ingredients.put(ingredient.get_id(), ingredient);
+		}
+		return ingredients;
 	}
+	
+	public int get_id()
+	{
+		return id;
+	}
+	
 }

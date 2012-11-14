@@ -7,6 +7,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.SparseArray;
 import ch.simonf.rezepte.recipe.Ingredient;
+import ch.simonf.rezepte.recipe.Recipe;
 import ch.simonf.rezepte.utils.Globals;
 
 public class User {
@@ -128,5 +129,27 @@ public class User {
 			
 		}.execute();
 
+	}
+	
+	public float getRecipeMatch(Recipe recipe)
+	{
+		if(this.ingredients.size() == 0)
+			return 0;
+		
+		SparseArray<Ingredient> recipeIngredients = recipe.getIngredients();
+		int total = recipeIngredients.size();
+		int mutual = 0;
+		
+		for(int i = 0; i < total; i++)
+		{
+			int key = recipeIngredients.valueAt(i).get_id();
+			
+			if(this.ingredients.get(key) != null)
+				mutual++;
+		}
+		
+		float percentage = ((float) mutual) / ((float) total) * 100;
+		
+		return (float) percentage;
 	}
 }

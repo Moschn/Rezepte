@@ -35,14 +35,6 @@ public class ViewRecipeActivity extends Activity {
 	// reference to mysql object
 	MySQL mysql = Globals.mysql;
 	User user = Globals.user;
-	
-	TextView recipe_name;
-	TextView recipe_servings;
-	TextView recipe_prepare_time;
-	TextView recipe_cooking_time;
-	TextView recipe_ingredients;
-	TextView recipe_measurement;
-	TextView recipe_amount;
 
 	String pid;
 	int id;
@@ -97,12 +89,15 @@ public class ViewRecipeActivity extends Activity {
 	private void updateRecipeDetailsView()
 	{
 		setContentView(R.layout.view_recipe);
-		recipe_name = (TextView) findViewById(R.id.view_recipe_name_label);
-		recipe_servings = (TextView) findViewById(R.id.view_recipe_servings_label);
-		recipe_prepare_time = (TextView) findViewById(R.id.view_recipe_prepare_time_label);
-		recipe_cooking_time = (TextView) findViewById(R.id.view_recipe_cooking_time_label);
+		TextView recipe_name = (TextView) findViewById(R.id.view_recipe_name_label);
+		TextView recipe_match = (TextView) findViewById(R.id.view_recipe_recipe_match);
+		TextView recipe_servings = (TextView) findViewById(R.id.view_recipe_servings_label);
+		TextView recipe_prepare_time = (TextView) findViewById(R.id.view_recipe_prepare_time_label);
+		TextView recipe_cooking_time = (TextView) findViewById(R.id.view_recipe_cooking_time_label);
 		
 		recipe_name.setText(recipe.name);
+		int match = (int)user.getRecipeMatch(recipe);
+		recipe_match.setText(Integer.toString(match) + "% Übereinstimmung");
 		recipe_servings.setText(Integer.toString(recipe.servings));
 		recipe_prepare_time.setText(Integer.toString(recipe.prepare_time));
 		recipe_cooking_time.setText(Integer.toString(recipe.cooking_time));				
