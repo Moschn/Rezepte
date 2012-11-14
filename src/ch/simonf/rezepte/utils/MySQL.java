@@ -247,8 +247,11 @@ public class MySQL {
 			String json = jUser.getString("ingredients");
 			JSONObject temp = new JSONObject(json);
 			JSONArray jIngredients = temp.getJSONArray("ingredients");
-			getIngredientDetails(jIngredients);
-			user.addIngredient(jIngredients);
+			if(jIngredients.length() > 0)
+			{
+				getIngredientDetails(jIngredients);
+				user.addIngredient(jIngredients);
+			}
 			return true;
 		}
 	}
