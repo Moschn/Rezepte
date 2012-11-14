@@ -5,6 +5,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.ViewGroup.LayoutParams;
@@ -12,6 +13,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import ch.simonf.rezepte.R;
+import ch.simonf.rezepte.activities.User;
 import ch.simonf.rezepte.recipe.Ingredient;
 import ch.simonf.rezepte.recipe.Measurement;
 import ch.simonf.rezepte.recipe.Recipe;
@@ -32,6 +34,7 @@ public class ViewRecipeActivity extends Activity {
 
 	// reference to mysql object
 	MySQL mysql = Globals.mysql;
+	User user = Globals.user;
 	
 	TextView recipe_name;
 	TextView recipe_servings;
@@ -167,6 +170,13 @@ public class ViewRecipeActivity extends Activity {
 		    col4.setText(comment);
 		    
 		    tl_ingr.addView(tr);// add rows to the table.
+		    
+		    // add attributes to this arrangement if ingredient is connected to user
+		    int key = ingredient.get_id();
+		    if(user.ingredients.get(key) != null)
+		    {
+		    	col3.setTextColor(Color.GREEN);
+		    }
 		}
 		
 		// get Instructions

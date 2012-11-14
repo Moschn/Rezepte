@@ -107,6 +107,7 @@ public class MainScreenActivity extends Activity{
 	        JSONObject obj;
 	        
 			protected void onPreExecute(){
+				mysql.setupDialog(MainScreenActivity.this, "Login...");
 			}
 			
 			@Override
@@ -138,13 +139,16 @@ public class MainScreenActivity extends Activity{
 		        String name = obj.optString("name");
 		        
 		        //create new User instance with retrieved facebook id
-		        
 		        Globals.user = new User(facebookId);
 		        mysql.user = Globals.user;
+		        
+		        // check if user already exists
 		        Globals.user.inExistence();
 		        
 		        TextView welcomeMessage = (TextView) findViewById(R.id.main_screen_welcome_message);
 		        welcomeMessage.setText("Willkommen " + name);
+		        
+		        mysql.dismissDialog();
 			}
 		};
 		
