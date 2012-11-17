@@ -1,5 +1,6 @@
 package ch.simonf.rezepte.activities;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
@@ -12,6 +13,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
@@ -20,10 +22,12 @@ import ch.simonf.rezepte.activities.Ingredients.AllIngredientsActivity;
 import ch.simonf.rezepte.activities.Ingredients.NewIngredientActivity;
 import ch.simonf.rezepte.activities.Recipes.AllRecipesActivity;
 import ch.simonf.rezepte.utils.AsyncQueue;
+import ch.simonf.rezepte.utils.Dialog;
 import ch.simonf.rezepte.utils.Globals;
 import ch.simonf.rezepte.utils.MySQL;
 
 import com.facebook.android.AsyncFacebookRunner;
+import com.facebook.android.AsyncFacebookRunner.RequestListener;
 import com.facebook.android.DialogError;
 import com.facebook.android.Facebook;
 import com.facebook.android.Facebook.DialogListener;
@@ -43,6 +47,31 @@ public class MainScreenActivity extends Activity{
     Facebook facebook = new Facebook("217995184999450");
     AsyncFacebookRunner mAsyncRunner = new AsyncFacebookRunner(facebook);
     private SharedPreferences mPrefs;
+    private JSONObject jFacebookUser;
+    
+    DialogListener fbDialogListener = new DialogListener() {
+        @Override
+        public void onComplete(Bundle values) {
+            SharedPreferences.Editor editor = mPrefs.edit();
+            editor.putString("access_token", facebook.getAccessToken());
+            editor.putLong("access_expires", facebook.getAccessExpires());
+            editor.commit();
+            
+            // restart MainScreenActivity
+			Intent i = new Intent(getApplicationContext(), MainScreenActivity.class);
+			finish();
+			startActivity(i);
+        }
+
+        @Override
+        public void onFacebookError(FacebookError error) {}
+
+        @Override
+        public void onError(DialogError e) {}
+
+        @Override
+        public void onCancel() {}
+    };
     //----------------//
     
 	@Override
@@ -54,10 +83,9 @@ public class MainScreenActivity extends Activity{
 		
 		setContentView(R.layout.main_screen);
 		
+		Globals.dialog = new Dialog();
 		Globals.mysql = new MySQL();
-		//Globals.user = new User();
 		this.mysql = Globals.mysql;
-		//mysql.user = Globals.user;
 		
 		// not used at the moment
 		Globals.asyncQueue = new AsyncQueue();
@@ -104,7 +132,6 @@ public class MainScreenActivity extends Activity{
 		final AsyncTask<Void, Void, Void> fetchFacebookInfo = new AsyncTask<Void, Void, Void>() {
 
 	        String jsonUser;
-	        JSONObject obj;
 	        
 			protected void onPreExecute(){
 				mysql.setupDialog(MainScreenActivity.this, "Login...");
@@ -115,7 +142,7 @@ public class MainScreenActivity extends Activity{
 				
 				try {
 					jsonUser = facebook.request("me");
-					obj = Util.parseJson(jsonUser);
+					jFacebookUser = Util.parseJson(jsonUser);	
 					
 				} catch (MalformedURLException e1) {
 					// TODO Auto-generated catch block
@@ -124,7 +151,7 @@ public class MainScreenActivity extends Activity{
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				} catch (FacebookError e) {
-					// TODO Auto-generated catch block
+					facebook.authorize(MainScreenActivity.this, new String[] {}, fbDialogListener);
 					e.printStackTrace();
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
@@ -135,20 +162,22 @@ public class MainScreenActivity extends Activity{
 			
 			protected void onPostExecute(Void results)
 			{
-				String facebookId = obj.optString("id");
-		        String name = obj.optString("name");
-		        
-		        //create new User instance with retrieved facebook id
-		        Globals.user = new User(facebookId);
-		        mysql.user = Globals.user;
-		        
-		        // check if user already exists
-		        Globals.user.inExistence();
-		        
-		        TextView welcomeMessage = (TextView) findViewById(R.id.main_screen_welcome_message);
-		        welcomeMessage.setText("Willkommen " + name);
-		        
-		        mysql.dismissDialog();
+				if(jFacebookUser != null)
+				{
+					String facebookId = jFacebookUser.optString("id");
+			        String name = jFacebookUser.optString("name");
+			        
+			        //create new User instance with retrieved facebook id
+			        Globals.user = new User(facebookId);
+			        mysql.user = Globals.user;
+			        
+			        // check if user already exists
+			        Globals.user.inExistence();
+			        
+			        TextView welcomeMessage = (TextView) findViewById(R.id.main_screen_welcome_message);
+			        welcomeMessage.setText("Willkommen " + name); 
+			        mysql.dismissDialog();
+				}			
 			}
 		};
 		
@@ -170,38 +199,57 @@ public class MainScreenActivity extends Activity{
         }
 		
         
-        
         /*
          * Only call authorize if the access_token has expired.
          */
         if(!facebook.isSessionValid()) {
-
-            facebook.authorize(this, new String[] {}, new DialogListener() {
-                @Override
-                public void onComplete(Bundle values) {
-                    SharedPreferences.Editor editor = mPrefs.edit();
-                    editor.putString("access_token", facebook.getAccessToken());
-                    editor.putLong("access_expires", facebook.getAccessExpires());
-                    editor.commit();
-                    fetchFacebookInfo.execute();
-                }
-    
-                @Override
-                public void onFacebookError(FacebookError error) {}
-    
-                @Override
-                public void onError(DialogError e) {}
-    
-                @Override
-                public void onCancel() {}
-            });
+            facebook.authorize(this, new String[] {}, fbDialogListener);
         }
         else
+        {
         	fetchFacebookInfo.execute();
+        }
         
+        // Facebook logout
+        
+        TextView tvLogout = (TextView) findViewById(R.id.main_screen_logout);
+        
+        tvLogout.setOnClickListener(new View.OnClickListener()
+        {
+
+			@Override
+			public void onClick(View v) {
+		       mAsyncRunner.logout(getBaseContext(), new RequestListener() {
+		        	  @Override
+		        	  public void onComplete(String response, Object state) {
+		        		  finish();
+		        	  }
+		        	  
+		        	  @Override
+		        	  public void onIOException(IOException e, Object state) {}
+		        	  
+		        	  @Override
+		        	  public void onFileNotFoundException(FileNotFoundException e,
+		        	        Object state) {}
+		        	  
+		        	  @Override
+		        	  public void onMalformedURLException(MalformedURLException e,
+		        	        Object state) {}
+		        	  
+		        	  @Override
+		        	  public void onFacebookError(FacebookError e, Object state) {}
+		        	});
+			}
+        	
+        });
         
 		
 	}
+	
+    public void onResume() {    
+        super.onResume();
+        facebook.extendAccessTokenIfNeeded(this, null);
+    }
 	
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

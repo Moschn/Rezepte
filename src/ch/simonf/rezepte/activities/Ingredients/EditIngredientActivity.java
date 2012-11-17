@@ -152,7 +152,7 @@ public class EditIngredientActivity extends Activity {
 
 							// product with this pid found
 							// Edit Text
-							txtName = (EditText) findViewById(R.id.inputName);
+							txtName = (EditText) findViewById(R.id.input_name);
 							//txtPrice = (EditText) findViewById(R.id.inputPrice);
 							//txtDesc = (EditText) findViewById(R.id.inputDesc);
 

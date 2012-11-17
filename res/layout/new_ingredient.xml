@@ -4,63 +4,63 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
     
-    <!-- Name Label -->
-    <TextView android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="Zutat"
-        android:paddingLeft="10dip"
-        android:paddingRight="10dip"
-        android:paddingTop="10dip"
-        android:textSize="17dip"/>
+	 <TableLayout 
+	    android:layout_height="wrap_content"
+ 	    android:layout_width="match_parent"
+ 	    android:padding="10dp">
+	    <TableRow >
     
-    <!-- Input Name -->
-	<EditText android:id="@+id/inputName"
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-	    android:layout_margin="5dip"
-	    android:layout_marginBottom="15dip"
-	    android:singleLine="true"/>
+		    <!-- Name Label -->
+		    <TextView 
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="Name"/>
+		    
+		    <!-- Input Name -->
+			<EditText 
+			    android:id="@+id/input_name"
+			    android:layout_weight="1"
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    android:hint="z.B. Tomate"/>
 	
-	<!-- Price Label -->
-    <!--<TextView android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="Price"
-        android:paddingLeft="10dip"
-        android:paddingRight="10dip"
-        android:paddingTop="10dip"
-        android:textSize="17dip"/>-->
-    
-    <!-- Input Price -->
-	<!--<EditText android:id="@+id/inputPrice" 
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-	    android:layout_margin="5dip"
-	    android:layout_marginBottom="15dip"
-	    android:singleLine="true"
-	    android:inputType="numberDecimal"/>-->
+		</TableRow>
+		
+		<TableRow >
+		    <TextView 
+		        android:text="Mehrzahl"
+		        android:layout_height="wrap_content"
+		        android:layout_width="wrap_content"/>
+		    
+		    <EditText 
+		        android:id="@+id/input_plural"
+		        android:layout_weight="1"
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
+		        android:hint="z.B. Tomaten"/>
+		    
+		</TableRow>
+		
+		<TableRow >
+    		<CheckBox
+    		    android:id="@+id/checkbox_spice"
+    		    android:layout_weight="1"
+    		    android:layout_span="2"
+		        android:text="Bei dieser Zutat handelt es sich um ein Gewürz"
+		        android:layout_height="wrap_content"
+		        android:layout_width="wrap_content"/>
+    		
+    		<TextView />
+		</TableRow>
+			
+		
+	</TableLayout>
 	
-	<!-- Description Label -->
-    <!--<TextView android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="Description"
-        android:paddingLeft="10dip"
-        android:paddingRight="10dip"
-        android:paddingTop="10dip"
-        android:textSize="17dip"/>-->
-    
-    <!-- Input description -->
-	<!--<EditText android:id="@+id/inputDesc" 
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-	    android:layout_margin="5dip"
-	    android:layout_marginBottom="15dip"
-	    android:lines="4"
-	    android:gravity="top"/>-->
+
 	
-	<!-- Button Create Product -->
-	<Button android:id="@+id/btnCreateProduct" 
+	<Button android:id="@+id/button_create" 
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
-	    android:text="Create Product"/>
+	    android:text="Zutat erstellen"/>
 	
 </LinearLayout>

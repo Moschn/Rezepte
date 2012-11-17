@@ -6,5 +6,6 @@ public class Globals {
 	// global reference to the mysql object
     public static MySQL mysql;
     public static User user;
+    public static Dialog dialog;
     public static AsyncQueue asyncQueue;
 }
