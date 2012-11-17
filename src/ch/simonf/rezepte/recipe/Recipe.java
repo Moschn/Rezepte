@@ -18,6 +18,7 @@ public class Recipe{
 	public int updated_by;
 	public Timestamp created_at;
 	public Timestamp updated_at;
+	public float match;
 	
 	public Recipe(int id, String name)
 	{
@@ -42,6 +43,11 @@ public class Recipe{
 	public int get_id()
 	{
 		return id;
+	}
+	
+	public String toString()
+	{
+		return name;
 	}
 	
 }

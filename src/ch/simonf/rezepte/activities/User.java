@@ -42,7 +42,7 @@ public class User {
 			}
 			protected void onPostExecute(Boolean results)
 			{
-				// if this user is currently not in existence
+				// if this user does not exist yet
 				// add the id to our DB
 				if(!results)
 					createUser();
@@ -149,6 +149,9 @@ public class User {
 		}
 		
 		float percentage = ((float) mutual) / ((float) total) * 100;
+		
+		// save the current match into the particular recipe instance
+		recipe.match = percentage;
 		
 		return (float) percentage;
 	}
